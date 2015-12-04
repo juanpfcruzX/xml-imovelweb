@@ -1,10 +1,17 @@
 <?php
 // XML PARA EXPORTAÇÃO DE IMOVEIS PARA O PORTAL IMOVELWEB
+
+/* CHAMANDA PARA A CONEXÃO COM O BANCO DE DADOS */
 include "conexao.php";
+
+/* GERAR URL DO SERVIDOR */
 $endereco = "http://".$_SERVER['SERVER_NAME']."/";
 
-
-
+/* ===================================
+REMOVE TODOS OS CARACTERES ESPECIAIS 
+PARA NÃO DAR CONFLITO COM AS TAGS E 
+PARA AS URLs AMIGÁVEIS
+====================================*/
 function removerCaracter($str){
   $remover = array("à" => "a","á" => "a","ã" => "a","â" => "a","é" => "e","ê" => "e","ì" => 
                    "i","í" => "i","ó" => "o","õ" => "o","ô" => "o","ú" => "u","ü" => "u","ç" => 
@@ -13,6 +20,9 @@ function removerCaracter($str){
   return str_replace("£", "", str_replace(",", "", str_replace(".", "",strtolower(strtr($str, $remover)))));
  }
 
+/* =========================================
+SELECT EM TODAS AS TABELAS NO BANCO DE DADOS 
+===========================================*/
 $sql = mysql_query("SELECT i.*, date_format(i.datacadastro, '%d/%m/%Y') AS datacadastro, date_format(i.dataatualizacao, '%d/%m/%Y') AS dataatualizacao, 
 	                t.tipo AS tipo, c.nome AS cidade, f.fase AS fase, b.nome AS bairro, p.imagem AS imgprincipal, u.nome AS corretor, if(i.negociacao_id=1, 'Vender', 'Alugar') AS negociacao
                     FROM tb_imoveis AS i INNER JOIN tb_tipos AS t
@@ -29,10 +39,10 @@ $sql = mysql_query("SELECT i.*, date_format(i.datacadastro, '%d/%m/%Y') AS datac
                     ON u.id = i.user01_id 
                     WHERE vendido = 0 ORDER BY id") or die(mysql_error());
 		
-//Abrindo documento xml para integração com o Portal IMOVELWEB
+//ABRINDO O ARQUIVO XML INSERIDO NA VARIAVEL $xml
 $xml = "<?xml version='1.0' encoding='iso-8859-1'?>";
  
-//Abre bloco do xml
+//BLOCO COM AS TAGS PARA MONTAR A ESTRUTURA XML
 $xml .= "<Carga xmlns:xsi=http://www.w3.org/2001/XMLSchema-instancexmlns:xsd='http://www.w3.org/2001/XMLSchema'>";
 
 		$xml .= "<Configuracao>";
@@ -40,7 +50,8 @@ $xml .= "<Carga xmlns:xsi=http://www.w3.org/2001/XMLSchema-instancexmlns:xsd='ht
 		$xml .= "</Configuracao>";
 		
 		$xml .= "<Imoveis>";
-
+	
+	/* LOOP EM TODOS OS DADOS DO BANCO */
 	while ($row = mysql_fetch_array($sql)){
 
 			$xml .= "<Imovel>";
@@ -68,13 +79,14 @@ $xml .= "<Carga xmlns:xsi=http://www.w3.org/2001/XMLSchema-instancexmlns:xsd='ht
 
 			$xml .= "</Imovel>";
 		
-	}//fecha while 
+	}//FIM DO LOOP 
 
-//fechando bloco do xml
+//FIM DO BLOCO XML
 		$xml .= "</Imoveis>";
 		
 $xml .= "</ListingDataFeed>";
-
+	
+	// ARQUIVO DE DESTINO COM EXTENSÃO .xml
 	file_put_contents('../../xml/iw_ofertas.xml',$xml);	
 
 ?>
