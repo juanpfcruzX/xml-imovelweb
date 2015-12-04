@@ -1,16 +1,16 @@
 <?php
-// XML PARA EXPORTAÇÃO DE IMOVEIS PARA O PORTAL IMOVELWEB
+// XML PARA EXPORTAÃ‡ÃƒO DE IMOVEIS PARA O PORTAL IMOVELWEB
 include "conexao.php";
-//$endereco = "http://".$_SERVER['SERVER_NAME']."/";
+$endereco = "http://".$_SERVER['SERVER_NAME']."/";
 
 
 
 function removerCaracter($str){
-  $remover = array("à" => "a","á" => "a","ã" => "a","â" => "a","é" => "e","ê" => "e","ì" => 
-                   "i","í" => "i","ó" => "o","õ" => "o","ô" => "o","ú" => "u","ü" => "u","ç" => 
-                   "c","À" => "A","Á" => "A","Ã" => "A","Â" => "A","É" => "E","Ê" => "E","Í" => 
-                   "I","Ó" => "O","Õ" => "O","Ô" => "O","Ù" => "U","Ú" => "U","Ü" => "U"," " => "-");
-  return str_replace("£", "", str_replace(",", "", str_replace(".", "",strtolower(strtr($str, $remover)))));
+  $remover = array("Ã " => "a","Ã¡" => "a","Ã£" => "a","Ã¢" => "a","Ã©" => "e","Ãª" => "e","Ã¬" => 
+                   "i","Ã­" => "i","Ã³" => "o","Ãµ" => "o","Ã´" => "o","Ãº" => "u","Ã¼" => "u","Ã§" => 
+                   "c","Ã€" => "A","Ã" => "A","Ãƒ" => "A","Ã‚" => "A","Ã‰" => "E","ÃŠ" => "E","Ã" => 
+                   "I","Ã“" => "O","Ã•" => "O","Ã”" => "O","Ã™" => "U","Ãš" => "U","Ãœ" => "U"," " => "-");
+  return str_replace("Â£", "", str_replace(",", "", str_replace(".", "",strtolower(strtr($str, $remover)))));
  }
 
 $sql = mysql_query("SELECT i.*, date_format(i.datacadastro, '%d/%m/%Y') AS datacadastro, date_format(i.dataatualizacao, '%d/%m/%Y') AS dataatualizacao, 
@@ -29,8 +29,8 @@ $sql = mysql_query("SELECT i.*, date_format(i.datacadastro, '%d/%m/%Y') AS datac
                     ON u.id = i.user01_id 
                     WHERE vendido = 0 ORDER BY id") or die(mysql_error());
 		
-//Abrindo documento xml para integração com o Portal IMOVELWEB
-$xml = "<?xml version="1.0" encoding="iso-8859-1"?>";
+//Abrindo documento xml para integraÃ§Ã£o com o Portal IMOVELWEB
+$xml = "<?xml version='1.0' encoding='iso-8859-1'?>";
  
 //Abre bloco do xml
 $xml .= "<Carga xmlns:xsi=http://www.w3.org/2001/XMLSchema-instancexmlns:xsd='http://www.w3.org/2001/XMLSchema'>";
@@ -42,39 +42,30 @@ $xml .= "<Carga xmlns:xsi=http://www.w3.org/2001/XMLSchema-instancexmlns:xsd='ht
 		$xml .= "<Imoveis>";
 
 	while ($row = mysql_fetch_array($sql)){
-			
-			$string = $row['tipo']."-com-".$row['quarto_id']."-quartos-no-bairro-".$row['bairro']."-em-".$row['cidade']."-com-".$row['areaconstruida']."m2";
-			$string = removerCaracter($string);
 
 			$xml .= "<Imovel>";
-				$xml .= "<CodigoCentralVendas>12345</CodigoCentralVendas>";
-				$xml .= "<CodigoImovel>$row[id]</CodigoImovel>";
-				$xml .= "<TipoImovel>";
-						if($row['tipo'] == 'Apartamento' ){
-						$xml .= "<TipoImovel>Residential / Apartment</TipoImovel>";
-						}
-						if($row['tipo'] == 'Casa' ){
-							$xml .= "<TipoImovel>Residential / Home</TipoImovel>";
-						}
-						if($row['tipo'] == 'Terreno' ){
-							$xml .= "<TipoImovel>Commercial / Building</TipoImovel>";
-						}
-						if($row['tipo'] == 'Cobertura' ){
-							$xml .= "<TipoImovel>Residential / Apartment</TipoImovel>";
-						}
-						if($row['tipo'] == 'Comercial' ){
-							$xml .= "<TipoImovel>Commercial / Business</TipoImovel>";
-						}
-						if($row['tipo'] == 'Flat' ){
-							$xml .= "<TipoImovel>Residential / Flat</TipoImovel>";
-						}
-						if($row['tipo'] == 'Galpão' ){
-							$xml .= "<TipoImovel>Residential / Hangar</TipoImovel>";
-						}
-						if($row['tipo'] == 'Granja' ){
-							$xml .= "<TipoImovel>Residential / Farm Ranch</TipoImovel>";
-						}
-				$xml .= "</TipoImovel>";
+
+				$xml .= "<CodigoCentralVendas>793252</CodigoCentralVendas>";
+				$xml .= "<CodigoImovel>".$row['id']."</CodigoImovel>";
+				$xml .= "<TipoImovel>".$row['tipo']."</TipoImovel>";
+				$xml .= "<UF>".$row['uf']."</UF>";
+				$xml .= "<Cidade>".$row['cidade']."</Cidade>";
+				$xml .= "<Bairro>".$row['bairro']."</Bairro>";
+				$xml .= "<Endereco>".$row['endereco']."</Endereco>";
+				$xml .= "<AreaTotal>".$row['areaconstruida']."</AreaTotal>";
+				$xml .= "<UnidadeMetrica>mÂ²</UnidadeMetrica>";
+				$xml .= "<QtdDormitorios>".$row['quarto_id']."</QtdDormitorios>";
+				$xml .= "<QtdSuites>".$row['suite_id']."</QtdSuites>";
+				$xml .= "<QtdVagas>".$row['vaga_id']."</QtdVagas>";
+				$xml .= "<Observacoes><![CDATA[".utf8_decode(strip_tags(str_replace('&nbsp;', ' ', $row['descricao'])))."]]></Observacoes>";
+				$xml .= "<Foto>";
+					$query = mysql_query("SELECT * FROM tb_imagens WHERE imovel_id = $row[id] AND id <> $row[imagem] ORDER BY ordem LIMIT 1") or die(mysql_error());	
+					while($linha = mysql_fetch_array($query)){	
+						$xml .= "<URLArquivo>http://www.cinataimoveis.com.br/admin/includes/upload/".$linha['imagem']."</URLArquivo>";
+				    }
+					$xml .= "<Principal>1</Principal>";
+				$xml .= "</Foto>";
+
 			$xml .= "</Imovel>";
 		
 	}//fecha while 
